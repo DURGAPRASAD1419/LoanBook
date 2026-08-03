@@ -409,4 +409,8 @@ app.put("/api/loans/:loanId/due/:dueNo/reschedule", async (req, res) => {
 });
 
 // Export the app for serverless targets (Vercel) and local starters.
-export default app;
+const PORT = process.env.PORT || 4000;
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
