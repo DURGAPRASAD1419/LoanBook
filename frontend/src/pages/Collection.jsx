@@ -295,13 +295,13 @@ export default function Collection() {
                 )}
               </span>
               <span
-                className={`text-base leading-tight ${
+                className={`text-sm sm:text-base leading-tight ${
                   tab === item
                     ? "text-blue-700 font-semibold"
                     : "text-gray-500 font-medium"
                 }`}
               >
-                {item} Collections
+                {item}
               </span>
             </label>
           ))}
