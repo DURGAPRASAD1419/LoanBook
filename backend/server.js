@@ -408,7 +408,5 @@ app.put("/api/loans/:loanId/due/:dueNo/reschedule", async (req, res) => {
   res.json(loan);
 });
 
-const port = process.env.PORT || 4000;
-app.listen(port, () => {
-  console.log(`LoanBook backend listening on port ${port}`);
-});
+// Export the app for serverless targets (Vercel) and local starters.
+export default app;

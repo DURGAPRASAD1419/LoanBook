@@ -41,3 +41,15 @@ src/
 - Replace `AuthContext.login` with a real auth API call (store a token instead of a fake user object).
 - Replace the mock `addBorrower` / `addLoan` / `payDue` functions in `DataContext` with API calls, and
   load `borrowers` / `loans` from the server on mount instead of `localStorage`.
+
+## Deploy to Vercel (quick)
+
+1. Push this repository to GitHub.
+2. On Vercel, import the same repository twice: once for the `backend` and once for the `frontend`.
+  - Backend settings: set **Root Directory** to `backend`, Framework to `Other`.
+  - Frontend settings: set **Root Directory** to `frontend`, Framework to `Vite`, Build Command `npm run build`, Output Directory `dist`.
+3. Add environment variables in Vercel:
+  - Frontend: `VITE_API_URL` → your backend URL (e.g. `https://your-backend.vercel.app`).
+  - Backend: `MONGO_URI` (your Atlas URL), `JWT_SECRET` (if used).
+4. Redeploy both projects and confirm the frontend can reach the backend URL.
+
