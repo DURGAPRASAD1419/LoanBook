@@ -73,9 +73,6 @@ export default function Login() {
           </button>
 
           <p className="text-center text-gray-500 text-sm">
-            Forgot PIN? Contact your administrator.
-          </p>
-          <p className="text-center text-gray-500 text-sm">
             Don't have an account? <Link to="/signup" className="text-primary font-semibold">Sign up</Link>
           </p>
         </form>
