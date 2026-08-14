@@ -16,6 +16,7 @@ export default function Signup() {
   const [usernameAvailable, setUsernameAvailable] = useState(null);
   const [suggested, setSuggested] = useState("");
 
+  const showPasswordChecks = password.length > 0;
   const lengthOk = password.length >= 8;
   const upperOk = /[A-Z]/.test(password);
   const numberOk = /[0-9]/.test(password);
@@ -141,42 +142,46 @@ export default function Signup() {
                 </div>
               </div>
 
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 shadow-sm">
-                <span className={lengthOk ? "p-1 rounded-full bg-green-50 text-green-500" : "p-1 rounded-full bg-gray-100 text-gray-300"}>
-                  {lengthOk ? <Check size={16} /> : <X size={16} />}
-                </span>
-                <span className="text-sm text-gray-700">8+ characters</span>
-              </div>
-              <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 shadow-sm">
-                <span className={upperOk ? "p-1 rounded-full bg-green-50 text-green-500" : "p-1 rounded-full bg-gray-100 text-gray-300"}>
-                  {upperOk ? <Check size={16} /> : <X size={16} />}
-                </span>
-                <span className="text-sm text-gray-700">Uppercase letter</span>
-              </div>
-              <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 shadow-sm">
-                <span className={numberOk ? "p-1 rounded-full bg-green-50 text-green-500" : "p-1 rounded-full bg-gray-100 text-gray-300"}>
-                  {numberOk ? <Check size={16} /> : <X size={16} />}
-                </span>
-                <span className="text-sm text-gray-700">Number</span>
-              </div>
-              <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 shadow-sm">
-                <span className={specialOk ? "p-1 rounded-full bg-green-50 text-green-500" : "p-1 rounded-full bg-gray-100 text-gray-300"}>
-                  {specialOk ? <Check size={16} /> : <X size={16} />}
-                </span>
-                <span className="text-sm text-gray-700">Special character</span>
-              </div>
-            </div>
+            {showPasswordChecks && (
+              <>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 shadow-sm">
+                    <span className={lengthOk ? "p-1 rounded-full bg-green-50 text-green-500" : "p-1 rounded-full bg-gray-100 text-gray-300"}>
+                      {lengthOk ? <Check size={16} /> : <X size={16} />}
+                    </span>
+                    <span className="text-sm text-gray-700">8+ characters</span>
+                  </div>
+                  <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 shadow-sm">
+                    <span className={upperOk ? "p-1 rounded-full bg-green-50 text-green-500" : "p-1 rounded-full bg-gray-100 text-gray-300"}>
+                      {upperOk ? <Check size={16} /> : <X size={16} />}
+                    </span>
+                    <span className="text-sm text-gray-700">Uppercase letter</span>
+                  </div>
+                  <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 shadow-sm">
+                    <span className={numberOk ? "p-1 rounded-full bg-green-50 text-green-500" : "p-1 rounded-full bg-gray-100 text-gray-300"}>
+                      {numberOk ? <Check size={16} /> : <X size={16} />}
+                    </span>
+                    <span className="text-sm text-gray-700">Number</span>
+                  </div>
+                  <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 shadow-sm">
+                    <span className={specialOk ? "p-1 rounded-full bg-green-50 text-green-500" : "p-1 rounded-full bg-gray-100 text-gray-300"}>
+                      {specialOk ? <Check size={16} /> : <X size={16} />}
+                    </span>
+                    <span className="text-sm text-gray-700">Special character</span>
+                  </div>
+                </div>
 
-            <div className="mt-3">
-              <div className="w-full h-2 rounded-full bg-gray-200 overflow-hidden">
-                <div
-                  className={`h-2 rounded-full transition-all duration-300 ${strengthColor}`}
-                  style={{ width: `${strengthPercent}%` }}
-                />
-              </div>
-              <div className="mt-1 text-sm text-gray-600">Password strength: <span className="font-semibold text-gray-800">{strengthLabel}</span></div>
-            </div>
+                <div className="mt-3">
+                  <div className="w-full h-2 rounded-full bg-gray-200 overflow-hidden">
+                    <div
+                      className={`h-2 rounded-full transition-all duration-300 ${strengthColor}`}
+                      style={{ width: `${strengthPercent}%` }}
+                    />
+                  </div>
+                  <div className="mt-1 text-sm text-gray-600">Password strength: <span className="font-semibold text-gray-800">{strengthLabel}</span></div>
+                </div>
+              </>
+            )}
           </div>
 
           <div>
