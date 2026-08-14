@@ -274,7 +274,7 @@ export default function Collection() {
 
   return (
     <div className="app-shell">
-      <Header title="Collection" showSearch searchPanel={collectionSearchPanel} onSearch={setSearch} />
+      <Header title="Collection" showSearch onSearch={setSearch} />
 
       {/* Radio-style tabs */}
       <section className="px-6 py-4 bg-white shadow-md rounded-2xl border-none mb-4">

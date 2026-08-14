@@ -226,7 +226,7 @@ export default function Borrowers() {
 
   return (
     <div className="app-shell">
-      <Header title="Borrowers" showSearch searchPanel={borrowersSearchPanel} onSearch={setSearch} />
+      <Header title="Borrowers" showSearch onSearch={setSearch} />
 
       <main className="flex-1 overflow-y-auto hide-scrollbar relative px-4 py-3 bg-gray-50">
           <div className="mb-3 space-y-2 rounded-2xl bg-white shadow-md p-4 border-none">

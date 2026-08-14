@@ -114,7 +114,7 @@ export default function Header({
                         if (onSearch) onSearch(e.target.value);
                       }}
                       placeholder="Search borrowers, loans..."
-                      className="w-full bg-transparent text-sm text-gray-900 outline-none"
+                      className="header-search-input w-full bg-transparent text-sm text-gray-900 outline-none border-0 shadow-none focus:outline-none focus:ring-0 focus:border-0"
                     />
                     <button
                       onClick={() => {
@@ -146,10 +146,6 @@ export default function Header({
                         </button>
                       ))}
                     </div>
-                  )}
-                  {/* allow pages to inject additional filter UI below the search box */}
-                  {searchPanel && (
-                    <div className="mt-3">{searchPanel}</div>
                   )}
                 </div>
               )}

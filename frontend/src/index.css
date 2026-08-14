@@ -219,6 +219,15 @@ input:focus, textarea:focus, select:focus {
   scrollbar-width: none;
 }
 
+.header-search-input:focus,
+.header-search-input:focus-visible,
+.header-search-input:active {
+  outline: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
 input:focus, select:focus, textarea:focus {
   outline: none;
   border-color: #2563eb !important;
