@@ -2,11 +2,10 @@
 
 # 💼 LoanBook
 
-**A mobile-first loan & borrower management app** — track borrowers, disbursements, due collections, and repayment history, wrapped in a glassy, animated 3D interface.
+**A mobile-first loan & borrower management app** — track borrowers, disbursements, due collections, and repayment history.
 
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev)
 [![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)](https://vitejs.dev)
-[![Three.js](https://img.shields.io/badge/Three.js-0.165-000000?logo=three.js&logoColor=white)](https://threejs.org)
 [![Node.js](https://img.shields.io/badge/Node.js-Express-339933?logo=node.js&logoColor=white)](https://nodejs.org)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/atlas)
 [![Tailwind](https://img.shields.io/badge/Tailwind_CSS-3-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
@@ -19,7 +18,7 @@
 
 LoanBook is a two-part app for tracking informal or small-scale lending:
 
-- **Frontend** — a React + Vite single-page app styled as a phone-width "app shell," with a full-screen **Three.js** background scene (floating coins, glass cards, and rings rendered with physically-based materials, real-time lighting, and cursor-driven parallax) that gives the whole UI a sense of real depth.
+- **Frontend** — a React + Vite single-page app styled as a phone-width "app shell," built mobile-first with a clean, card-based UI.
 - **Backend** — an Express + MongoDB REST API handling auth, borrowers, loans, due collection, rescheduling, and CSV export.
 
 ## 🖼 Highlights
@@ -30,8 +29,7 @@ LoanBook is a two-part app for tracking informal or small-scale lending:
 - 🔁 Due rescheduling and payment history
 - 📊 Dashboard graphs (via Recharts) for collections and outstanding totals
 - 📤 CSV export of loan data
-- 🧊 Real-time animated 3D background (Three.js) — physically-based materials, environment reflections, and pointer parallax, fully decorative and click-through so it never blocks the UI
-- 📱 Mobile-first layout that also looks great on desktop, with a frosted-glass "app card" effect
+- 📱 Mobile-first layout that also looks great on desktop
 
 ## 🗂 Project Structure
 
@@ -39,7 +37,7 @@ LoanBook is a two-part app for tracking informal or small-scale lending:
 LoanBook1/
 ├── frontend/                 React + Vite client
 │   ├── src/
-│   │   ├── components/       Header, BottomNav, modals, ThreeScene (3D background), ProtectedRoute
+│   │   ├── components/       Header, BottomNav, modals, ProtectedRoute
 │   │   ├── context/          AuthContext, DataContext
 │   │   ├── pages/            Login, Signup, Dashboard, Collection, Loan, Borrowers, Graphs, Settings, ...
 │   │   └── utils/            exportUtils (CSV export)
@@ -56,7 +54,6 @@ LoanBook1/
 | Layer      | Technology |
 |------------|------------|
 | Frontend   | React 19, React Router 7, Vite 8, Tailwind CSS |
-| 3D / Visuals | Three.js (PBR materials, PMREM environment lighting, custom shaders) |
 | Charts     | Recharts |
 | Icons      | lucide-react |
 | Backend    | Node.js, Express |
@@ -110,7 +107,7 @@ cd frontend
 npm run dev
 ```
 
-Open the printed local URL (typically `http://localhost:5173`). Resize your browser to phone width (or use dev tools device mode) for the closest match to the intended design — the 3D background scales to fill any viewport.
+Open the printed local URL (typically `http://localhost:5173`). Resize your browser to phone width (or use dev tools device mode) for the closest match to the intended design.
 
 ## 📡 API Reference
 
