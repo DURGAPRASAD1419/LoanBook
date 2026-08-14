@@ -6,6 +6,9 @@ import path from "path";
 import { fileURLToPath } from "url";
 import Borrower from "./models/Borrower.js";
 import Loan from "./models/Loan.js";
+import User from "./models/User.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,11 +27,74 @@ if (!mongoUri) {
 mongoose.set("strictQuery", false);
 mongoose
   .connect(mongoUri)
-  .then(() => console.log("Connected to MongoDB."))
+  .then(() => {
+    console.log("Connected to MongoDB.");
+    try {
+      const dbName = mongoose.connection.db.databaseName;
+      console.log("Using MongoDB database:", dbName);
+    } catch (e) {
+      // ignore
+    }
+  })
   .catch((error) => {
     console.error("MongoDB connection error:", error);
     process.exit(1);
   });
+
+const JWT_SECRET = process.env.JWT_SECRET || "change-me-local";
+
+function authMiddleware(req, res, next) {
+  const auth = req.headers.authorization;
+  if (!auth || !auth.startsWith("Bearer ")) return res.status(401).json({ message: "Unauthorized" });
+  const token = auth.slice(7);
+  try {
+    const payload = jwt.verify(token, JWT_SECRET);
+    req.user = payload;
+    return next();
+  } catch (e) {
+    return res.status(401).json({ message: "Invalid token" });
+  }
+}
+
+app.post("/api/auth/register", async (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password) return res.status(400).json({ message: "Username and password required." });
+  const existing = await User.findOne({ username: username.trim() });
+  if (existing) return res.status(400).json({ message: "Username already taken." });
+  const saltRounds = 10;
+  const passwordHash = await bcrypt.hash(password, saltRounds);
+  const user = new User({ username: username.trim(), passwordHash });
+  try {
+    await user.save();
+    res.status(201).json({ username: user.username });
+  } catch (e) {
+    // handle duplicate key or other save errors
+    if (e.code === 11000) {
+      return res.status(400).json({ message: "Username already taken." });
+    }
+    console.error('Failed to create user', e);
+    return res.status(500).json({ message: "Failed to create user." });
+  }
+});
+
+// Check username availability
+app.get('/api/auth/check-username', async (req, res) => {
+  const username = (req.query.username || '').trim();
+  if (!username) return res.json({ available: false });
+  const existing = await User.findOne({ username });
+  res.json({ available: !existing });
+});
+
+app.post("/api/auth/login", async (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password) return res.status(400).json({ message: "Username and password required." });
+  const user = await User.findOne({ username: username.trim() });
+  if (!user) return res.status(400).json({ message: "Invalid username or password." });
+  const ok = await bcrypt.compare(password, user.passwordHash);
+  if (!ok) return res.status(400).json({ message: "Invalid username or password." });
+  const token = jwt.sign({ username: user.username, sub: user._id.toString() }, JWT_SECRET, { expiresIn: "30d" });
+  res.json({ token, username: user.username });
+});
 
 async function createLoanId(collectionType) {
   const prefix = collectionType === "Weekly" ? "WL" : collectionType === "Monthly" ? "ML" : "DL";
@@ -120,12 +186,14 @@ function buildUpdatedDues(loan, collectionType, installments, perInstallment, st
   return newDues;
 }
 
-app.get("/api/borrowers", async (req, res) => {
-  const borrowers = await Borrower.find().sort({ createdAt: 1 });
+app.get("/api/borrowers", authMiddleware, async (req, res) => {
+  const owner = req.user?.username;
+  const filter = owner ? { createdBy: owner } : {};
+  const borrowers = await Borrower.find(filter).sort({ createdAt: 1 });
   res.json(borrowers);
 });
 
-app.post("/api/borrowers", async (req, res) => {
+app.post("/api/borrowers", authMiddleware, async (req, res) => {
   const { aadhar, name, fatherName, mobile, mobile2, shopWork, address } = req.body;
   if (!name || !fatherName || !mobile || !shopWork || !address) {
     return res.status(400).json({ message: "Missing required borrower fields." });
@@ -133,12 +201,21 @@ app.post("/api/borrowers", async (req, res) => {
 
   const count = await Borrower.countDocuments();
   const id = `B-${count + 1}`;
-  const borrower = new Borrower({ id, aadhar, name, fatherName, mobile, mobile2, shopWork, address });
+  const borrower = new Borrower({ id, aadhar, name, fatherName, mobile, mobile2, shopWork, address, createdBy: req.user.username });
   await borrower.save();
+  try {
+    await User.findOneAndUpdate(
+      { username: req.user.username },
+      { $addToSet: { borrowers: borrower.id } },
+      { upsert: true }
+    );
+  } catch (e) {
+    console.warn('Failed to update user borrowers array', e.message);
+  }
   res.status(201).json(borrower);
 });
 
-app.delete("/api/borrowers/:id", async (req, res) => {
+app.delete("/api/borrowers/:id", authMiddleware, async (req, res) => {
   const id = req.params.id;
   console.log("DELETE /api/borrowers/:id called with id=", id);
   // First try to find by custom `id` field
@@ -160,21 +237,43 @@ app.delete("/api/borrowers/:id", async (req, res) => {
     return res.status(404).json({ message: "Borrower not found." });
   }
 
+  if (borrower.createdBy && borrower.createdBy !== req.user.username) {
+    return res.status(403).json({ message: "Forbidden" });
+  }
+
   const borrowerIdValue = borrower.id || borrower._id;
   console.log("Deleting borrower record:", borrowerIdValue);
 
   // Remove borrower and any loans associated with them
+  const deletedLoans = await Loan.find({ borrowerId: borrowerIdValue }).lean();
   await Loan.deleteMany({ borrowerId: borrowerIdValue });
+  // Remove loan refs from user
+  try {
+    const loanIds = deletedLoans.map((l) => l.loanId);
+    if (loanIds.length) {
+      await User.updateOne({ username: borrower.createdBy }, { $pull: { loans: { $in: loanIds } } });
+    }
+  } catch (e) {
+    console.warn('Failed to remove loan refs from user', e.message);
+  }
   await borrower.deleteOne();
+  // Remove borrower ref from user
+  try {
+    await User.updateOne({ username: borrower.createdBy }, { $pull: { borrowers: borrowerIdValue } });
+  } catch (e) {
+    console.warn('Failed to remove borrower ref from user', e.message);
+  }
   res.json({ message: "Borrower and related loans deleted." });
 });
 
-app.get("/api/loans", async (req, res) => {
-  const loans = await Loan.find().sort({ createdAt: 1 });
+app.get("/api/loans", authMiddleware, async (req, res) => {
+  const owner = req.user?.username;
+  const filter = owner ? { createdBy: owner } : {};
+  const loans = await Loan.find(filter).sort({ createdAt: 1 });
   res.json(loans);
 });
 
-app.post("/api/loans", async (req, res) => {
+app.post("/api/loans", authMiddleware, async (req, res) => {
   const {
     borrowerId,
     borrowerName,
@@ -202,6 +301,7 @@ app.post("/api/loans", async (req, res) => {
   const endDate = addInterval(start, collectionType, installments - 1);
   const loan = new Loan({
     loanId,
+    createdBy: req.user.username,
     borrowerId,
     borrowerName,
     collectionType,
@@ -217,21 +317,37 @@ app.post("/api/loans", async (req, res) => {
   });
 
   await loan.save();
+  try {
+    await User.findOneAndUpdate(
+      { username: req.user.username },
+      { $addToSet: { loans: loan.loanId } },
+      { upsert: true }
+    );
+  } catch (e) {
+    console.warn('Failed to update user loans array', e.message);
+  }
   res.status(201).json(loan);
 });
 
-app.get("/api/loans/:loanId", async (req, res) => {
+app.get("/api/loans/:loanId", authMiddleware, async (req, res) => {
   const loan = await Loan.findOne({ loanId: req.params.loanId });
   if (!loan) {
     return res.status(404).json({ message: "Loan not found." });
   }
+  if (loan.createdBy && loan.createdBy !== req.user.username) {
+    return res.status(403).json({ message: "Forbidden" });
+  }
   res.json(loan);
 });
 
-app.put("/api/loans/:loanId", async (req, res) => {
+app.put("/api/loans/:loanId", authMiddleware, async (req, res) => {
   const loan = await Loan.findOne({ loanId: req.params.loanId });
   if (!loan) {
     return res.status(404).json({ message: "Loan not found." });
+  }
+
+  if (loan.createdBy && loan.createdBy !== req.user.username) {
+    return res.status(403).json({ message: "Forbidden" });
   }
 
   const {
@@ -281,19 +397,29 @@ app.put("/api/loans/:loanId", async (req, res) => {
   res.json(loan);
 });
 
-app.delete("/api/loans/:loanId", async (req, res) => {
+app.delete("/api/loans/:loanId", authMiddleware, async (req, res) => {
   const loan = await Loan.findOne({ loanId: req.params.loanId });
   if (!loan) {
     return res.status(404).json({ message: "Loan not found." });
   }
 
+  if (loan.createdBy && loan.createdBy !== req.user.username) {
+    return res.status(403).json({ message: "Forbidden" });
+  }
+
   await loan.deleteOne();
+  try {
+    await User.updateOne({ username: loan.createdBy }, { $pull: { loans: loan.loanId } });
+  } catch (e) {
+    console.warn('Failed to remove loan ref from user', e.message);
+  }
   res.json({ message: "Loan deleted." });
 });
 
-app.post("/api/backup", async (req, res) => {
-  const borrowers = await Borrower.find().sort({ createdAt: 1 }).lean();
-  const loans = await Loan.find().sort({ createdAt: 1 }).lean();
+app.post("/api/backup", authMiddleware, async (req, res) => {
+  const owner = req.user.username;
+  const borrowers = await Borrower.find({ createdBy: owner }).sort({ createdAt: 1 }).lean();
+  const loans = await Loan.find({ createdBy: owner }).sort({ createdAt: 1 }).lean();
 
   const backup = {
     createdAt: new Date().toISOString(),
@@ -304,8 +430,9 @@ app.post("/api/backup", async (req, res) => {
   res.json(backup);
 });
 
-app.get("/api/loans/export", async (req, res) => {
-  const loans = await Loan.find().sort({ createdAt: 1 }).lean();
+app.get("/api/loans/export", authMiddleware, async (req, res) => {
+  const owner = req.user.username;
+  const loans = await Loan.find({ createdBy: owner }).sort({ createdAt: 1 }).lean();
   const payload = {
     exportedAt: new Date().toISOString(),
     loans,
@@ -316,11 +443,15 @@ app.get("/api/loans/export", async (req, res) => {
   res.send(JSON.stringify(payload, null, 2));
 });
 
-app.put("/api/loans/:loanId/pay", async (req, res) => {
+app.put("/api/loans/:loanId/pay", authMiddleware, async (req, res) => {
   const { dueNo, paidDate, collectedBy } = req.body;
   const loan = await Loan.findOne({ loanId: req.params.loanId });
   if (!loan) {
     return res.status(404).json({ message: "Loan not found." });
+  }
+
+  if (loan.createdBy && loan.createdBy !== req.user.username) {
+    return res.status(403).json({ message: "Forbidden" });
   }
 
   const due = loan.dues.find((item) => item.dueNo === Number(dueNo));
@@ -337,11 +468,15 @@ app.put("/api/loans/:loanId/pay", async (req, res) => {
   res.json(loan);
 });
 
-app.put("/api/loans/:loanId/due/:dueNo/reschedule", async (req, res) => {
+app.put("/api/loans/:loanId/due/:dueNo/reschedule", authMiddleware, async (req, res) => {
   const { dueDate, rescheduledBy, rescheduleReason } = req.body;
   const loan = await Loan.findOne({ loanId: req.params.loanId });
   if (!loan) {
     return res.status(404).json({ message: "Loan not found." });
+  }
+
+  if (loan.createdBy && loan.createdBy !== req.user.username) {
+    return res.status(403).json({ message: "Forbidden" });
   }
 
   const dueIndex = loan.dues.findIndex((item) => item.dueNo === Number(req.params.dueNo));

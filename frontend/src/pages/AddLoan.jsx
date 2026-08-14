@@ -92,7 +92,7 @@ export default function AddLoan() {
 
   return (
     <div className="app-shell">
-      <header className="flex items-center gap-3 px-4 py-4 bg-white border-b border-gray-200 sticky top-0 z-20">
+      <header className="flex items-center gap-3 px-4 py-4 bg-white border-b border-gray-200 sticky top-0 z-20 card-3d header-3d">
         <button onClick={() => navigate(-1)} className="text-primary" aria-label="Go back">
           <ArrowLeft size={26} />
         </button>
@@ -100,7 +100,7 @@ export default function AddLoan() {
       </header>
 
       <main className="flex-1 overflow-y-auto hide-scrollbar px-4 pb-6 bg-gray-50">
-        <div className="rounded-2xl bg-white shadow-md p-5 border-none space-y-4">
+        <div className="rounded-2xl bg-white shadow-md p-5 border-none space-y-4 card-3d">
           <div className="flex items-center justify-between py-3">
           <span className="text-gray-500 text-[13px] shrink-0 mr-3">Select customer</span>
           <select
@@ -206,7 +206,7 @@ export default function AddLoan() {
 
           <button
             onClick={handleApprove}
-            className="w-full bg-primary text-white rounded-2xl py-3 font-bold mt-1 shadow-md"
+            className="w-full btn-primary mt-1"
           >
           APPROVE
           </button>

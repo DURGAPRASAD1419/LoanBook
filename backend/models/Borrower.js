@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 const borrowerSchema = new mongoose.Schema(
   {
     id: { type: String, required: true, unique: true },
+    createdBy: String,
     aadhar: String,
     name: { type: String, required: true },
     fatherName: { type: String, required: true },

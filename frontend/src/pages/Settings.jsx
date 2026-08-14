@@ -58,7 +58,7 @@ export default function Settings() {
           <button
             onClick={handleCreateBackup}
             disabled={loading}
-            className="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
+            className="w-full btn-primary disabled:opacity-60"
           >
             {loading ? "Creating backup…" : "Create Backup"}
           </button>

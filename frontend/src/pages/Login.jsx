@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { IndianRupee, User, Lock } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
@@ -10,9 +10,10 @@ export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    const result = login(username, password);
+    setError("");
+    const result = await login(username, password);
     if (result.ok) {
       navigate("/");
     } else {
@@ -73,6 +74,9 @@ export default function Login() {
 
           <p className="text-center text-gray-500 text-sm">
             Forgot PIN? Contact your administrator.
+          </p>
+          <p className="text-center text-gray-500 text-sm">
+            Don't have an account? <Link to="/signup" className="text-primary font-semibold">Sign up</Link>
           </p>
         </form>
       </div>

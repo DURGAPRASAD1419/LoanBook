@@ -18,6 +18,7 @@ const dueSchema = new mongoose.Schema(
 const loanSchema = new mongoose.Schema(
   {
     loanId: { type: String, required: true, unique: true },
+    createdBy: String,
     borrowerId: String,
     borrowerName: String,
     collectionType: String,

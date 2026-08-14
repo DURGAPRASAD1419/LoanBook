@@ -415,7 +415,7 @@ export default function Borrowers() {
 
         <button
           onClick={() => navigate("/borrowers/add")}
-          className="fixed bottom-20 right-6 bg-blue-700 text-white rounded-full pl-4 pr-5 py-3 flex items-center gap-2 shadow-lg font-semibold"
+          className="fab"
           style={{ maxWidth: 480 }}
         >
           <Plus size={20} /> ADD BORROWER

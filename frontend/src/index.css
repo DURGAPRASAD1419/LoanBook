@@ -40,7 +40,173 @@ body, input, textarea, select, button {
   position: relative;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 0 20px rgba(0,0,0,0.08);
+  box-shadow: 0 14px 40px rgba(2,6,23,0.08);
+  border-radius: 18px;
+  transform-style: preserve-3d;
+  transition: transform 300ms cubic-bezier(.2,.9,.2,1), box-shadow 300ms ease;
+}
+.app-shell:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 40px 80px rgba(2,6,23,0.12);
+}
+
+/* Ensure app root gets pointer events and above any stray overlays */
+#root {
+  position: relative;
+  z-index: 10;
+  pointer-events: auto !important;
+}
+
+/* Ensure interactive elements are clickable even if other layers exist */
+button, a, input, select, textarea {
+  pointer-events: auto !important;
+}
+
+/* Global CSS 3D theme */
+:root {
+  --card-bg: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+  --primary-600: #1652b4; /* refined professional blue */
+  --primary-500: #2563eb;
+  --muted-600: #0f1724;
+  --surface-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  --surface-shadow-strong: 0 28px 68px rgba(15, 23, 42, 0.10);
+  --rim-color: rgba(13, 71, 161, 0.06);
+  --glass: rgba(255,255,255,0.6);
+}
+
+/* Add perspective so children can feel 3D */
+#root, body {
+  perspective: 1000px;
+  perspective-origin: 50% 40%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Generic 3D card style applied to main containers */
+.card-3d {
+  transform-style: preserve-3d;
+  background: var(--card-bg);
+  box-shadow: var(--surface-shadow);
+  border-radius: 16px;
+  transition: transform 260ms cubic-bezier(.2,.9,.2,1), box-shadow 260ms ease;
+  backface-visibility: hidden;
+}
+.card-3d:hover {
+  transform: translateY(-10px) rotateX(0.8deg);
+  box-shadow: var(--surface-shadow-strong);
+}
+
+/* Prevent lifting for persistent chrome like header/footer */
+.header-3d,
+.no-lift {
+  transform: none !important;
+}
+.header-3d:hover,
+.no-lift:hover {
+  transform: none !important;
+  box-shadow: var(--surface-shadow);
+}
+
+/* Apply refined 3D card visuals to existing utility card patterns */
+.rounded-2xl.bg-white.shadow-md,
+.rounded-2xl.bg-white.shadow-md.p-4,
+.rounded-2xl.bg-white.shadow-md.p-4.border-none {
+  background: var(--card-bg);
+  border: 1px solid rgba(15,23,42,0.04);
+  box-shadow: var(--surface-shadow);
+  border-radius: 14px;
+  transition: transform 240ms ease, box-shadow 240ms ease;
+  backface-visibility: hidden;
+}
+.rounded-2xl.bg-white.shadow-md:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--surface-shadow-strong);
+}
+
+/* Inputs and buttons get layered surfaces */
+input, textarea, select {
+  border-radius: 12px;
+  background: linear-gradient(180deg, #fff, #f7fafc);
+  box-shadow: 0 8px 18px rgba(2,6,23,0.06), inset 0 1px 0 rgba(255,255,255,0.6);
+  transition: box-shadow 220ms ease, transform 220ms ease;
+  backface-visibility: hidden;
+}
+input:focus, textarea:focus, select:focus {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px rgba(2,6,23,0.14), 0 2px 6px rgba(99,102,241,0.06);
+}
+
+.btn-3d {
+  border-radius: 10px;
+  background: linear-gradient(180deg, var(--primary-600), var(--primary-500));
+  color: white;
+  padding: 10px 14px;
+  font-weight: 600;
+  box-shadow: 0 10px 26px rgba(13, 71, 161, 0.12), inset 0 -5px 10px rgba(0,0,0,0.06);
+  transition: transform 180ms cubic-bezier(.2,.9,.2,1), box-shadow 180ms ease;
+  backface-visibility: hidden;
+  pointer-events: auto;
+  position: relative;
+  z-index: 5;
+}
+.btn-3d:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 28px 56px rgba(13, 71, 161, 0.10), inset 0 -4px 8px rgba(0,0,0,0.04);
+}
+
+/* Primary flat buttons (used across the app) */
+.btn-primary {
+  background: linear-gradient(180deg, var(--primary-500), #1e4ed8);
+  color: #fff;
+  border-radius: 10px;
+  padding: 10px 14px;
+  box-shadow: 0 8px 18px rgba(15,23,42,0.06);
+}
+
+/* Floating action button style */
+.fab {
+  position: fixed;
+  right: 20px;
+  /* place above bottom navigation (nav height + margin) */
+  bottom: calc(20px + 64px);
+  border-radius: 999px;
+  padding: 12px 16px;
+  background: linear-gradient(180deg, var(--primary-500), var(--primary-600));
+  color: #fff;
+  box-shadow: 0 18px 48px rgba(15,23,42,0.12);
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Floating header and nav */
+.header-3d, header {
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 8px 20px rgba(2,6,23,0.05);
+}
+
+/* Modal style for 3D depth */
+.modal-3d {
+  border-radius: 14px;
+  box-shadow: 0 40px 90px rgba(2,6,23,0.28);
+}
+.modal-3d {
+  border-radius: 12px;
+  background: linear-gradient(180deg,#fff,#fbfdff);
+  border: 1px solid rgba(15,23,42,0.04);
+  box-shadow: 0 30px 80px rgba(15,23,42,0.10);
+}
+
+/* small rim highlight for important interactive pieces */
+.rim-highlight::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 30px var(--rim-color) inset;
+  pointer-events: none;
 }
 
 .app-shell :is(.border, .border-b, .border-t, .border-l, .border-r, .border-x, .border-y),

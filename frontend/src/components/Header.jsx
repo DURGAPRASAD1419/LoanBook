@@ -75,7 +75,7 @@ export default function Header({
 
   return (
     <header className="relative bg-white border-b border-gray-200 sticky top-0 z-20">
-      <div className="flex items-center justify-between px-4 py-4">
+      <div className="flex items-center justify-between px-4 py-4 card-3d header-3d">
         <div className="flex items-center gap-3">
           {showBack && (
             <button
@@ -129,7 +129,7 @@ export default function Header({
                   </div>
 
                   {filteredSuggestions.length > 0 && (
-                    <div className="mt-2 max-h-72 overflow-y-auto rounded-2xl border border-gray-200 bg-white shadow-xl">
+                    <div className="mt-2 max-h-72 overflow-y-auto rounded-2xl border border-gray-200 bg-white shadow-xl card-3d">
                       {filteredSuggestions.map((item) => (
                         <button
                           key={`${item.type}-${item.value}`}

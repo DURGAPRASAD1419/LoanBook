@@ -1,4 +1,5 @@
 import { createContext, useContext, useState } from "react";
+import { registerUser, loginUser } from "../api";
 
 const AuthContext = createContext(null);
 
@@ -8,31 +9,43 @@ export function AuthProvider({ children }) {
     return stored ? JSON.parse(stored) : null;
   });
 
-  function login(username, password) {
-    const expectedUsername = import.meta.env.VITE_APP_USERNAME?.trim();
-    const expectedPassword = import.meta.env.VITE_APP_PASSWORD?.trim();
+  async function register(username, password) {
+    if (!username?.trim() || !password) {
+      return { ok: false, message: "Enter username and password." };
+    }
+    try {
+      await registerUser(username.trim(), password);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, message: e.message };
+    }
+  }
 
-    if (!username.trim() || !password.trim()) {
+  async function login(username, password) {
+    if (!username?.trim() || !password) {
       return { ok: false, message: "Enter both username and password." };
     }
-
-    if (username.trim() !== expectedUsername || password !== expectedPassword) {
-      return { ok: false, message: "Invalid username or password." };
+    try {
+      const result = await loginUser(username.trim(), password);
+      // result: { token, username }
+      localStorage.setItem("loanbook_token", result.token);
+      const authenticatedUser = { username: result.username };
+      localStorage.setItem("loanbook_user", JSON.stringify(authenticatedUser));
+      setUser(authenticatedUser);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, message: e.message };
     }
-
-    const authenticatedUser = { username: username.trim() };
-    localStorage.setItem("loanbook_user", JSON.stringify(authenticatedUser));
-    setUser(authenticatedUser);
-    return { ok: true };
   }
 
   function logout() {
     localStorage.removeItem("loanbook_user");
+    localStorage.removeItem("loanbook_token");
     setUser(null);
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, register }}>
       {children}
     </AuthContext.Provider>
   );

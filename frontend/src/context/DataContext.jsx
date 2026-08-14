@@ -11,6 +11,7 @@ import {
   deleteBorrower as apiDeleteBorrower,
   deleteLoan as apiDeleteLoan,
 } from "../api";
+import { useAuth } from "./AuthContext";
 
 const DataContext = createContext(null);
 
@@ -56,6 +57,8 @@ export function DataProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const { user: currentUser } = useAuth();
+
   useEffect(() => {
     async function loadData() {
       try {
@@ -69,7 +72,8 @@ export function DataProvider({ children }) {
       }
     }
     loadData();
-  }, []);
+  }, [currentUser]);
+
 
   async function addBorrower(borrower) {
     const created = await createBorrower(borrower);

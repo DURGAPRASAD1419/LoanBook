@@ -164,7 +164,7 @@ export default function ViewDetails() {
 
       <main className="flex-1 overflow-y-auto hide-scrollbar px-6 py-4 bg-gray-50">
         {/* Profile + info card */}
-        <div className="rounded-2xl bg-white shadow-md p-4 border-none">
+        <div className="rounded-2xl bg-white shadow-md p-4 border-none card-3d">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xl font-bold text-gray-900">{borrower.name}</p>
@@ -172,7 +172,7 @@ export default function ViewDetails() {
             </div>
             <button
               onClick={() => navigate(`/borrowers/${id}/edit`)}
-              className="rounded-full border border-gray-300 px-5 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50"
+              className="btn-primary rounded-full px-5 py-2 text-sm font-semibold"
             >
               Edit borrower
             </button>
